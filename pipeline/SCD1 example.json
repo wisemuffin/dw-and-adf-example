@@ -1,0 +1,42 @@
+{
+	"name": "SCD1 example",
+	"properties": {
+		"activities": [
+			{
+				"name": "SCD1 example",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "Sink",
+						"type": "DataFlowReference"
+					},
+					"staging": {
+						"linkedService": {
+							"referenceName": "dw-and-adf-example-workspace-WorkspaceDefaultStorage",
+							"type": "LinkedServiceReference"
+						},
+						"folderPath": "dw-and-adf-example-fs/scd1-example"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine",
+					"sourceStagingConcurrency": 1
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2022-11-13T06:14:32Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

@@ -1,0 +1,10 @@
+{
+	"name": "synapse-ws-sqlOnDemand--dw-and-adf-example-workspace",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/5bb1f831-1295-40ab-b6e5-f33a8404b7e2/resourceGroups/dw-and-adf-example/providers/Microsoft.Synapse/workspaces/dw-and-adf-example-workspace",
+		"groupId": "sqlOnDemand",
+		"fqdns": [
+			"dw-and-adf-example-workspace-ondemand.c64c23b2-62e1-47d1-bfb3-1795c67f1f81.sql.azuresynapse.net"
+		]
+	}
+}

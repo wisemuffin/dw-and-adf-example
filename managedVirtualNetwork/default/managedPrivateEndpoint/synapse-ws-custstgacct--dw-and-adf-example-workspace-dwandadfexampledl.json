@@ -1,0 +1,10 @@
+{
+	"name": "synapse-ws-custstgacct--dw-and-adf-example-workspace-dwandadfexampledl",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/5bb1f831-1295-40ab-b6e5-f33a8404b7e2/resourceGroups/dw-and-adf-example/providers/Microsoft.Storage/storageAccounts/dwandadfexampledl",
+		"groupId": "dfs",
+		"fqdns": [
+			"dwandadfexampledl.dfs.core.windows.net"
+		]
+	}
+}

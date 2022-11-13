@@ -1,0 +1,17 @@
+{
+	"name": "CostomerSource-update",
+	"properties": {
+		"content": {
+			"query": "\nSELECT TOP (100) *\nfrom \n-- dbo.CustomerSource\ndbo.DimCustomer\nWHERE [CustomerId] = 4\n\ngo\n;\n\nUPDATE [dbo].[CustomerSource]\nSET LastName = 'Lopezz'\nWHERE [CustomerId] = 4\ngo\n\nSELECT TOP (100) [CustomerID]\n,[Title]\n,[FirstName]\n,[MiddleName]\n,[LastName]\n,[Suffix]\n,[CompanyName]\n,[SalesPerson]\n,[EmailAddress]\n,[Phone]\n FROM [dbo].[CustomerSource]\n go",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dwandadfexampledw",
+				"poolName": "dwandadfexampledw"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
