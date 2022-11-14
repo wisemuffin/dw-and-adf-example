@@ -1,0 +1,17 @@
+{
+	"name": "World Wide data load monitor",
+	"properties": {
+		"content": {
+			"query": "SELECT\n    r.command,\n    s.request_id,\n    r.status,\n    count(distinct input_name) as nbr_files,\n    sum(s.bytes_processed)/1024/1024/1024 as gb_processed\nFROM\n    sys.dm_pdw_exec_requests r\n    INNER JOIN sys.dm_pdw_dms_external_work s\n    ON r.request_id = s.request_id\nWHERE\n    r.[label] = 'CTAS : Load [wwi].[dimension_City]' OR\n    r.[label] = 'CTAS : Load [wwi].[dimension_Customer]' OR\n    r.[label] = 'CTAS : Load [wwi].[dimension_Employee]' OR\n    r.[label] = 'CTAS : Load [wwi].[dimension_PaymentMethod]' OR\n    r.[label] = 'CTAS : Load [wwi].[dimension_StockItem]' OR\n    r.[label] = 'CTAS : Load [wwi].[dimension_Supplier]' OR\n    r.[label] = 'CTAS : Load [wwi].[dimension_TransactionType]' OR\n    r.[label] = 'CTAS : Load [wwi].[fact_Movement]' OR\n    r.[label] = 'CTAS : Load [wwi].[fact_Order]' OR\n    r.[label] = 'CTAS : Load [wwi].[fact_Purchase]' OR\n    r.[label] = 'CTAS : Load [wwi].[fact_StockHolding]' OR\n    r.[label] = 'CTAS : Load [wwi].[fact_Transaction]'\nGROUP BY\n    r.command,\n    s.request_id,\n    r.status\nORDER BY\n    nbr_files desc,\n    gb_processed desc;\n\nSELECT * FROM sys.dm_pdw_exec_requests;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "SampleDW",
+				"poolName": "SampleDW"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
