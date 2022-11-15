@@ -1,0 +1,807 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "dw-and-adf-example-workspace"
+		},
+		"dw-and-adf-example-workspace-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'dw-and-adf-example-workspace-WorkspaceDefaultSqlServer'"
+		},
+		"dw-and-adf-example-workspace-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://dwandadfexampledl.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/SCD1 example')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "SCD1 example",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Sink",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"SourceDB": {},
+									"SynapseDimCustomer": {},
+									"Sink": {}
+								}
+							},
+							"staging": {
+								"linkedService": {
+									"referenceName": "dw-and-adf-example-workspace-WorkspaceDefaultStorage",
+									"type": "LinkedServiceReference"
+								},
+								"folderPath": "dw-and-adf-example-fs/scd1-example"
+							},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine",
+							"sourceStagingConcurrency": 1
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-11-13T06:14:32Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/Sink')]",
+				"[concat(variables('workspaceId'), '/linkedServices/dw-and-adf-example-workspace-WorkspaceDefaultStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/CustomerSource')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "dw-and-adf-example-workspace-WorkspaceDefaultSqlServer",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"DBName": "dwandadfexampledw"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "CustomerID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Title",
+						"type": "nvarchar"
+					},
+					{
+						"name": "FirstName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MiddleName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "LastName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Suffix",
+						"type": "nvarchar"
+					},
+					{
+						"name": "CompanyName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SalesPerson",
+						"type": "nvarchar"
+					},
+					{
+						"name": "EmailAddress",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Phone",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "CustomerSource"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/dw-and-adf-example-workspace-WorkspaceDefaultSqlServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SynapseDimCustomer')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "dw-and-adf-example-workspace-WorkspaceDefaultSqlServer",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"DBName": "dwandadfexampledw"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "CustomerID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Title",
+						"type": "nvarchar"
+					},
+					{
+						"name": "FirstName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MiddleName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "LastName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Suffix",
+						"type": "nvarchar"
+					},
+					{
+						"name": "CompanyName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SalesPerson",
+						"type": "nvarchar"
+					},
+					{
+						"name": "EmailAddress",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Phone",
+						"type": "nvarchar"
+					},
+					{
+						"name": "InsertedDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "ModifiedDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "HashKey",
+						"type": "char"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "DimCustomer"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/dw-and-adf-example-workspace-WorkspaceDefaultSqlServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dw-and-adf-example-workspace-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('dw-and-adf-example-workspace-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dw-and-adf-example-workspace-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('dw-and-adf-example-workspace-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0,
+							"cleanup": true
+						},
+						"pipelineExternalComputeScaleProperties": {
+							"timeToLive": 60
+						}
+					}
+				},
+				"managedVirtualNetwork": {
+					"type": "ManagedVirtualNetworkReference",
+					"referenceName": "default"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Sink')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "CustomerSource",
+								"type": "DatasetReference"
+							},
+							"name": "SourceDB"
+						},
+						{
+							"dataset": {
+								"referenceName": "SynapseDimCustomer",
+								"type": "DatasetReference"
+							},
+							"name": "SynapseDimCustomer"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "SynapseDimCustomer",
+								"type": "DatasetReference"
+							},
+							"name": "Sink",
+							"rejectedDataLinkedService": {
+								"referenceName": "dw-and-adf-example-workspace-WorkspaceDefaultStorage",
+								"type": "LinkedServiceReference"
+							}
+						}
+					],
+					"transformations": [
+						{
+							"name": "CreateCustomerHash"
+						},
+						{
+							"name": "Exists"
+						},
+						{
+							"name": "LookupCustomerID"
+						},
+						{
+							"name": "SetDates"
+						},
+						{
+							"name": "AllowUpserts"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          CustomerID as integer,",
+						"          Title as string,",
+						"          FirstName as string,",
+						"          MiddleName as string,",
+						"          LastName as string,",
+						"          Suffix as string,",
+						"          CompanyName as string,",
+						"          SalesPerson as string,",
+						"          EmailAddress as string,",
+						"          Phone as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table',",
+						"     staged: true) ~> SourceDB",
+						"source(output(",
+						"          CustomerID as integer,",
+						"          Title as string,",
+						"          FirstName as string,",
+						"          MiddleName as string,",
+						"          LastName as string,",
+						"          Suffix as string,",
+						"          CompanyName as string,",
+						"          SalesPerson as string,",
+						"          EmailAddress as string,",
+						"          Phone as string,",
+						"          InsertedDate as timestamp,",
+						"          ModifiedDate as timestamp,",
+						"          HashKey as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table',",
+						"     staged: true) ~> SynapseDimCustomer",
+						"SourceDB derive(HashKey = sha2(256, iifNull(Title,'') +FirstName +iifNull(MiddleName,'') +LastName +iifNull(Suffix,'') +iifNull(CompanyName,'') +iifNull(SalesPerson,'') +iifNull(EmailAddress,'') +iifNull(Phone,''))) ~> CreateCustomerHash",
+						"CreateCustomerHash, SynapseDimCustomer exists(CreateCustomerHash@HashKey == SynapseDimCustomer@HashKey,",
+						"     negate:true,",
+						"     broadcast: 'auto')~> Exists",
+						"Exists, SynapseDimCustomer lookup(SourceDB@CustomerID == SynapseDimCustomer@CustomerID,",
+						"     multiple: false,",
+						"     pickup: 'any',",
+						"     broadcast: 'auto')~> LookupCustomerID",
+						"LookupCustomerID derive(InsertedDate = iif(isNull(InsertedDate), currentTimestamp(), InsertedDate),",
+						"          ModifiedDate = currentTimestamp()) ~> SetDates",
+						"SetDates alterRow(upsertIf(true())) ~> AllowUpserts",
+						"AllowUpserts sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          CustomerID as integer,",
+						"          Title as string,",
+						"          FirstName as string,",
+						"          MiddleName as string,",
+						"          LastName as string,",
+						"          Suffix as string,",
+						"          CompanyName as string,",
+						"          SalesPerson as string,",
+						"          EmailAddress as string,",
+						"          Phone as string,",
+						"          InsertedDate as timestamp,",
+						"          ModifiedDate as timestamp,",
+						"          HashKey as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:true,",
+						"     keys:['CustomerID'],",
+						"     format: 'table',",
+						"     staged: false,",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          CustomerID = SourceDB@CustomerID,",
+						"          Title = SourceDB@Title,",
+						"          FirstName = SourceDB@FirstName,",
+						"          MiddleName = SourceDB@MiddleName,",
+						"          LastName = SourceDB@LastName,",
+						"          Suffix = SourceDB@Suffix,",
+						"          CompanyName = SourceDB@CompanyName,",
+						"          SalesPerson = SourceDB@SalesPerson,",
+						"          EmailAddress = SourceDB@EmailAddress,",
+						"          Phone = SourceDB@Phone,",
+						"          InsertedDate,",
+						"          ModifiedDate,",
+						"          HashKey = SynapseDimCustomer@HashKey",
+						"     )) ~> Sink"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/CustomerSource')]",
+				"[concat(variables('workspaceId'), '/datasets/SynapseDimCustomer')]",
+				"[concat(variables('workspaceId'), '/linkedServices/dw-and-adf-example-workspace-WorkspaceDefaultStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/CostomerSource-update')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "\nSELECT TOP (100) *\nfrom \n-- dbo.CustomerSource\ndbo.DimCustomer\nWHERE [CustomerId] = 4\n\ngo\n;\n\nUPDATE [dbo].[CustomerSource]\nSET LastName = 'Lopezz'\nWHERE [CustomerId] = 4\ngo\n\nSELECT TOP (100) [CustomerID]\n,[Title]\n,[FirstName]\n,[MiddleName]\n,[LastName]\n,[Suffix]\n,[CompanyName]\n,[SalesPerson]\n,[EmailAddress]\n,[Phone]\n FROM [dbo].[CustomerSource]\n go",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "dwandadfexampledw",
+						"poolName": "dwandadfexampledw"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/CustomerSource-and-dim')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "CREATE TABLE [dbo].[CustomerSource] (\n    [CustomerID] [int] NOT NULL,\n    [Title] [nvarchar](8),\n    [FirstName] [nvarchar](50),\n    [MiddleName] [nvarchar](50),\n    [LastName] [nvarchar](50),\n    [Suffix] [nvarchar](10),\n    [CompanyName] [nvarchar](128),\n    [SalesPerson] [nvarchar](256),\n    [EmailAddress] [nvarchar](50),\n    [Phone] [nvarchar](25)\n) WITH ( HEAP )\n\nCOPY INTO [dbo].[CustomerSource]\nFROM 'https://solliancepublicdata.blob.core.windows.net/dataengineering/dp-203/awdata/CustomerSource.csv'\nWITH (\n    FILE_TYPE='CSV',\n    FIELDTERMINATOR='|',\n    FIELDQUOTE='',\n    ROWTERMINATOR='0x0a',\n    ENCODING = 'UTF16'\n)\n\nCREATE TABLE dbo.[DimCustomer](\n    [CustomerID] [int] NOT NULL,\n    [Title] [nvarchar](8) NULL,\n    [FirstName] [nvarchar](50) NOT NULL,\n    [MiddleName] [nvarchar](50) NULL,\n    [LastName] [nvarchar](50) NOT NULL,\n    [Suffix] [nvarchar](10) NULL,\n    [CompanyName] [nvarchar](128) NULL,\n    [SalesPerson] [nvarchar](256) NULL,\n    [EmailAddress] [nvarchar](50) NULL,\n    [Phone] [nvarchar](25) NULL,\n    [InsertedDate] [datetime] NOT NULL,\n    [ModifiedDate] [datetime] NOT NULL,\n    [HashKey] [char](64)\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n)",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "dwandadfexampledw",
+						"poolName": "dwandadfexampledw"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/simple-order-sales')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "dwandadfexample",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "627d192e-a78d-464d-a2f9-03f8088909d8"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/5bb1f831-1295-40ab-b6e5-f33a8404b7e2/resourceGroups/dw-and-adf-example/providers/Microsoft.Synapse/workspaces/dw-and-adf-example-workspace/bigDataPools/dwandadfexample",
+						"name": "dwandadfexample",
+						"type": "Spark",
+						"endpoint": "https://dw-and-adf-example-workspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/dwandadfexample",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.2",
+						"nodeCount": 3,
+						"cores": 4,
+						"memory": 28
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "markdown",
+						"metadata": {
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"# Connect directly to a file"
+						]
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"microsoft": {
+								"language": "python"
+							}
+						},
+						"source": [
+							"%%pyspark\r\n",
+							"df = spark.read.load('abfss://dw-and-adf-example-fs@dwandadfexampledl.dfs.core.windows.net/simple-order-sales/salesorder.csv', format='csv'\r\n",
+							"## If header exists uncomment line below\r\n",
+							"##, header=True\r\n",
+							")\r\n",
+							"display(df.limit(10))"
+						],
+						"outputs": [],
+						"execution_count": 1
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							""
+						],
+						"outputs": [],
+						"execution_count": null
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dwandadfexample')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 5
+				},
+				"autoScale": {
+					"enabled": false,
+					"maxNodeCount": 0,
+					"minNodeCount": 0
+				},
+				"nodeCount": 3,
+				"nodeSize": "Small",
+				"nodeSizeFamily": "MemoryOptimized",
+				"sparkVersion": "3.2",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": true,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "australiaeast"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dwandadfexampledw')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"maxSizeBytes": 263882790666240,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "australiaeast"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-custstgacct--dw-and-adf-example-workspace-dwandadfexampledl')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/5bb1f831-1295-40ab-b6e5-f33a8404b7e2/resourceGroups/dw-and-adf-example/providers/Microsoft.Storage/storageAccounts/dwandadfexampledl",
+				"groupId": "dfs",
+				"fqdns": [
+					"dwandadfexampledl.dfs.core.windows.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-sql--dw-and-adf-example-workspace')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/5bb1f831-1295-40ab-b6e5-f33a8404b7e2/resourceGroups/dw-and-adf-example/providers/Microsoft.Synapse/workspaces/dw-and-adf-example-workspace",
+				"groupId": "sql",
+				"fqdns": [
+					"dw-and-adf-example-workspace.c64c23b2-62e1-47d1-bfb3-1795c67f1f81.sql.azuresynapse.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-sqlOnDemand--dw-and-adf-example-workspace')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/5bb1f831-1295-40ab-b6e5-f33a8404b7e2/resourceGroups/dw-and-adf-example/providers/Microsoft.Synapse/workspaces/dw-and-adf-example-workspace",
+				"groupId": "sqlOnDemand",
+				"fqdns": [
+					"dw-and-adf-example-workspace-ondemand.c64c23b2-62e1-47d1-bfb3-1795c67f1f81.sql.azuresynapse.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SampleDW')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/World Wide Data load')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "/* **************************************************************************************\n* Setup loads world wide sample dataset\n* source: https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/load-data-wideworldimportersdw\n************************************************************************************** */\n\nCREATE LOGIN LoaderRC60 WITH PASSWORD = 'CHANGEME';\nCREATE USER LoaderRC60 FOR LOGIN LoaderRC60;\n\n\nGRANT CONTROL ON DATABASE::[SampleDW] to LoaderRC60;\nEXEC sp_addrolemember 'staticrc60', 'LoaderRC60';\n\n\nCREATE MASTER KEY;\n\n\nCREATE EXTERNAL DATA SOURCE WWIStorage\nWITH\n(\n    TYPE = Hadoop,\n    LOCATION = 'wasbs://wideworldimporters@sqldwholdata.blob.core.windows.net'\n);\ngo\n\n\nCREATE EXTERNAL FILE FORMAT TextFileFormat\nWITH\n(\n    FORMAT_TYPE = DELIMITEDTEXT,\n    FORMAT_OPTIONS\n    (\n        FIELD_TERMINATOR = '|',\n        USE_TYPE_DEFAULT = FALSE\n    )\n);\n\n\nCREATE SCHEMA ext;\nGO\nCREATE SCHEMA wwi;\n\n/* **************************************************************************************\n* Create external tables\n************************************************************************************** */\n\nCREATE EXTERNAL TABLE [ext].[dimension_City](\n    [City Key] [int] NOT NULL,\n    [WWI City ID] [int] NOT NULL,\n    [City] [nvarchar](50) NOT NULL,\n    [State Province] [nvarchar](50) NOT NULL,\n    [Country] [nvarchar](60) NOT NULL,\n    [Continent] [nvarchar](30) NOT NULL,\n    [Sales Territory] [nvarchar](50) NOT NULL,\n    [Region] [nvarchar](30) NOT NULL,\n    [Subregion] [nvarchar](30) NOT NULL,\n    [Location] [nvarchar](76) NULL,\n    [Latest Recorded Population] [bigint] NOT NULL,\n    [Valid From] [datetime2](7) NOT NULL,\n    [Valid To] [datetime2](7) NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH (LOCATION='/v1/dimension_City/',\n    DATA_SOURCE = WWIStorage,  \n    FILE_FORMAT = TextFileFormat,\n    REJECT_TYPE = VALUE,\n    REJECT_VALUE = 0\n);  \nCREATE EXTERNAL TABLE [ext].[dimension_Customer] (\n    [Customer Key] [int] NOT NULL,\n    [WWI Customer ID] [int] NOT NULL,\n    [Customer] [nvarchar](100) NOT NULL,\n    [Bill To Customer] [nvarchar](100) NOT NULL,\n       [Category] [nvarchar](50) NOT NULL,\n    [Buying Group] [nvarchar](50) NOT NULL,\n    [Primary Contact] [nvarchar](50) NOT NULL,\n    [Postal Code] [nvarchar](10) NOT NULL,\n    [Valid From] [datetime2](7) NOT NULL,\n    [Valid To] [datetime2](7) NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH (LOCATION='/v1/dimension_Customer/',\n    DATA_SOURCE = WWIStorage,  \n    FILE_FORMAT = TextFileFormat,\n    REJECT_TYPE = VALUE,\n    REJECT_VALUE = 0\n);  \nCREATE EXTERNAL TABLE [ext].[dimension_Employee] (\n    [Employee Key] [int] NOT NULL,\n    [WWI Employee ID] [int] NOT NULL,\n    [Employee] [nvarchar](50) NOT NULL,\n    [Preferred Name] [nvarchar](50) NOT NULL,\n    [Is Salesperson] [bit] NOT NULL,\n    [Photo] [varbinary](300) NULL,\n    [Valid From] [datetime2](7) NOT NULL,\n    [Valid To] [datetime2](7) NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH ( LOCATION='/v1/dimension_Employee/',\n    DATA_SOURCE = WWIStorage,  \n    FILE_FORMAT = TextFileFormat,\n    REJECT_TYPE = VALUE,\n    REJECT_VALUE = 0\n);\nCREATE EXTERNAL TABLE [ext].[dimension_PaymentMethod] (\n    [Payment Method Key] [int] NOT NULL,\n    [WWI Payment Method ID] [int] NOT NULL,\n    [Payment Method] [nvarchar](50) NOT NULL,\n    [Valid From] [datetime2](7) NOT NULL,\n    [Valid To] [datetime2](7) NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH ( LOCATION ='/v1/dimension_PaymentMethod/',\n    DATA_SOURCE = WWIStorage,  \n    FILE_FORMAT = TextFileFormat,\n    REJECT_TYPE = VALUE,\n    REJECT_VALUE = 0\n);\nCREATE EXTERNAL TABLE [ext].[dimension_StockItem](\n    [Stock Item Key] [int] NOT NULL,\n    [WWI Stock Item ID] [int] NOT NULL,\n    [Stock Item] [nvarchar](100) NOT NULL,\n    [Color] [nvarchar](20) NOT NULL,\n    [Selling Package] [nvarchar](50) NOT NULL,\n    [Buying Package] [nvarchar](50) NOT NULL,\n    [Brand] [nvarchar](50) NOT NULL,\n    [Size] [nvarchar](20) NOT NULL,\n    [Lead Time Days] [int] NOT NULL,\n    [Quantity Per Outer] [int] NOT NULL,\n    [Is Chiller Stock] [bit] NOT NULL,\n    [Barcode] [nvarchar](50) NULL,\n    [Tax Rate] [decimal](18, 3) NOT NULL,\n    [Unit Price] [decimal](18, 2) NOT NULL,\n    [Recommended Retail Price] [decimal](18, 2) NULL,\n    [Typical Weight Per Unit] [decimal](18, 3) NOT NULL,\n    [Photo] [varbinary](300) NULL,\n    [Valid From] [datetime2](7) NOT NULL,\n    [Valid To] [datetime2](7) NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH ( LOCATION ='/v1/dimension_StockItem/',\n    DATA_SOURCE = WWIStorage,  \n    FILE_FORMAT = TextFileFormat,\n    REJECT_TYPE = VALUE,\n    REJECT_VALUE = 0\n);\nCREATE EXTERNAL TABLE [ext].[dimension_Supplier](\n    [Supplier Key] [int] NOT NULL,\n    [WWI Supplier ID] [int] NOT NULL,\n    [Supplier] [nvarchar](100) NOT NULL,\n    [Category] [nvarchar](50) NOT NULL,\n    [Primary Contact] [nvarchar](50) NOT NULL,\n    [Supplier Reference] [nvarchar](20) NULL,\n    [Payment Days] [int] NOT NULL,\n    [Postal Code] [nvarchar](10) NOT NULL,\n    [Valid From] [datetime2](7) NOT NULL,\n    [Valid To] [datetime2](7) NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH ( LOCATION ='/v1/dimension_Supplier/',\n    DATA_SOURCE = WWIStorage,  \n    FILE_FORMAT = TextFileFormat,\n    REJECT_TYPE = VALUE,\n    REJECT_VALUE = 0\n);\nCREATE EXTERNAL TABLE [ext].[dimension_TransactionType](\n    [Transaction Type Key] [int] NOT NULL,\n    [WWI Transaction Type ID] [int] NOT NULL,\n    [Transaction Type] [nvarchar](50) NOT NULL,\n    [Valid From] [datetime2](7) NOT NULL,\n    [Valid To] [datetime2](7) NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH ( LOCATION ='/v1/dimension_TransactionType/',\n    DATA_SOURCE = WWIStorage,  \n    FILE_FORMAT = TextFileFormat,\n    REJECT_TYPE = VALUE,\n    REJECT_VALUE = 0\n);\nCREATE EXTERNAL TABLE [ext].[fact_Movement] (\n    [Movement Key] [bigint] NOT NULL,\n    [Date Key] [date] NOT NULL,\n    [Stock Item Key] [int] NOT NULL,\n    [Customer Key] [int] NULL,\n    [Supplier Key] [int] NULL,\n    [Transaction Type Key] [int] NOT NULL,\n    [WWI Stock Item Transaction ID] [int] NOT NULL,\n    [WWI Invoice ID] [int] NULL,\n    [WWI Purchase Order ID] [int] NULL,\n    [Quantity] [int] NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH ( LOCATION ='/v1/fact_Movement/',\n    DATA_SOURCE = WWIStorage,  \n    FILE_FORMAT = TextFileFormat,\n    REJECT_TYPE = VALUE,\n    REJECT_VALUE = 0\n);\nCREATE EXTERNAL TABLE [ext].[fact_Order] (\n    [Order Key] [bigint] NOT NULL,\n    [City Key] [int] NOT NULL,\n    [Customer Key] [int] NOT NULL,\n    [Stock Item Key] [int] NOT NULL,\n    [Order Date Key] [date] NOT NULL,\n    [Picked Date Key] [date] NULL,\n    [Salesperson Key] [int] NOT NULL,\n    [Picker Key] [int] NULL,\n    [WWI Order ID] [int] NOT NULL,\n    [WWI Backorder ID] [int] NULL,\n    [Description] [nvarchar](100) NOT NULL,\n    [Package] [nvarchar](50) NOT NULL,\n    [Quantity] [int] NOT NULL,\n    [Unit Price] [decimal](18, 2) NOT NULL,\n    [Tax Rate] [decimal](18, 3) NOT NULL,\n    [Total Excluding Tax] [decimal](18, 2) NOT NULL,\n    [Tax Amount] [decimal](18, 2) NOT NULL,\n    [Total Including Tax] [decimal](18, 2) NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH ( LOCATION ='/v1/fact_Order/',\n    DATA_SOURCE = WWIStorage,\n    FILE_FORMAT = TextFileFormat,\n    REJECT_TYPE = VALUE,\n    REJECT_VALUE = 0\n);\nCREATE EXTERNAL TABLE [ext].[fact_Purchase] (\n    [Purchase Key] [bigint] NOT NULL,\n    [Date Key] [date] NOT NULL,\n    [Supplier Key] [int] NOT NULL,\n    [Stock Item Key] [int] NOT NULL,\n    [WWI Purchase Order ID] [int] NULL,\n    [Ordered Outers] [int] NOT NULL,\n    [Ordered Quantity] [int] NOT NULL,\n    [Received Outers] [int] NOT NULL,\n    [Package] [nvarchar](50) NOT NULL,\n    [Is Order Finalized] [bit] NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH ( LOCATION ='/v1/fact_Purchase/',\n    DATA_SOURCE = WWIStorage,  \n    FILE_FORMAT = TextFileFormat,\n    REJECT_TYPE = VALUE,\n    REJECT_VALUE = 0\n);\nCREATE EXTERNAL TABLE [ext].[fact_Sale] (\n    [Sale Key] [bigint] NOT NULL,\n    [City Key] [int] NOT NULL,\n    [Customer Key] [int] NOT NULL,\n    [Bill To Customer Key] [int] NOT NULL,\n    [Stock Item Key] [int] NOT NULL,\n    [Invoice Date Key] [date] NOT NULL,\n    [Delivery Date Key] [date] NULL,\n    [Salesperson Key] [int] NOT NULL,\n    [WWI Invoice ID] [int] NOT NULL,\n    [Description] [nvarchar](100) NOT NULL,\n    [Package] [nvarchar](50) NOT NULL,\n    [Quantity] [int] NOT NULL,\n    [Unit Price] [decimal](18, 2) NOT NULL,\n    [Tax Rate] [decimal](18, 3) NOT NULL,\n    [Total Excluding Tax] [decimal](18, 2) NOT NULL,\n    [Tax Amount] [decimal](18, 2) NOT NULL,\n    [Profit] [decimal](18, 2) NOT NULL,\n    [Total Including Tax] [decimal](18, 2) NOT NULL,\n    [Total Dry Items] [int] NOT NULL,\n    [Total Chiller Items] [int] NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH ( LOCATION ='/v1/fact_Sale/',\n    DATA_SOURCE = WWIStorage,  \n    FILE_FORMAT = TextFileFormat,\n    REJECT_TYPE = VALUE,\n    REJECT_VALUE = 0\n);\nCREATE EXTERNAL TABLE [ext].[fact_StockHolding] (\n    [Stock Holding Key] [bigint] NOT NULL,\n    [Stock Item Key] [int] NOT NULL,\n    [Quantity On Hand] [int] NOT NULL,\n    [Bin Location] [nvarchar](20) NOT NULL,\n    [Last Stocktake Quantity] [int] NOT NULL,\n    [Last Cost Price] [decimal](18, 2) NOT NULL,\n    [Reorder Level] [int] NOT NULL,\n    [Target Stock Level] [int] NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH ( LOCATION ='/v1/fact_StockHolding/',\n    DATA_SOURCE = WWIStorage,  \n    FILE_FORMAT = TextFileFormat,\n    REJECT_TYPE = VALUE,\n    REJECT_VALUE = 0\n);\nCREATE EXTERNAL TABLE [ext].[fact_Transaction] (\n    [Transaction Key] [bigint] NOT NULL,\n    [Date Key] [date] NOT NULL,\n    [Customer Key] [int] NULL,\n    [Bill To Customer Key] [int] NULL,\n    [Supplier Key] [int] NULL,\n    [Transaction Type Key] [int] NOT NULL,\n    [Payment Method Key] [int] NULL,\n    [WWI Customer Transaction ID] [int] NULL,\n    [WWI Supplier Transaction ID] [int] NULL,\n    [WWI Invoice ID] [int] NULL,\n    [WWI Purchase Order ID] [int] NULL,\n    [Supplier Invoice Number] [nvarchar](20) NULL,\n    [Total Excluding Tax] [decimal](18, 2) NOT NULL,\n    [Tax Amount] [decimal](18, 2) NOT NULL,\n    [Total Including Tax] [decimal](18, 2) NOT NULL,\n    [Outstanding Balance] [decimal](18, 2) NOT NULL,\n    [Is Finalized] [bit] NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH ( LOCATION ='/v1/fact_Transaction/',\n    DATA_SOURCE = WWIStorage,  \n    FILE_FORMAT = TextFileFormat,\n    REJECT_TYPE = VALUE,\n    REJECT_VALUE = 0\n);\n\n\n/* **************************************************************************************\n* Load the data into SQL pool\n\nThis tutorial loads the data directly into the final table. In a production environment, \nyou will usually use CREATE TABLE AS SELECT to load into a staging table. While data is in\n the staging table you can perform any necessary transformations. To append the data in the \n staging table to a production table, you can use the INSERT...SELECT statement.\n\n************************************************************************************** */\n\n\nCREATE TABLE [wwi].[dimension_City]\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [ext].[dimension_City]\nOPTION (LABEL = 'CTAS : Load [wwi].[dimension_City]')\n;\n\nCREATE TABLE [wwi].[dimension_Customer]\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [ext].[dimension_Customer]\nOPTION (LABEL = 'CTAS : Load [wwi].[dimension_Customer]')\n;\n\nCREATE TABLE [wwi].[dimension_Employee]\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [ext].[dimension_Employee]\nOPTION (LABEL = 'CTAS : Load [wwi].[dimension_Employee]')\n;\n\nCREATE TABLE [wwi].[dimension_PaymentMethod]\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [ext].[dimension_PaymentMethod]\nOPTION (LABEL = 'CTAS : Load [wwi].[dimension_PaymentMethod]')\n;\n\nCREATE TABLE [wwi].[dimension_StockItem]\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [ext].[dimension_StockItem]\nOPTION (LABEL = 'CTAS : Load [wwi].[dimension_StockItem]')\n;\n\nCREATE TABLE [wwi].[dimension_Supplier]\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [ext].[dimension_Supplier]\nOPTION (LABEL = 'CTAS : Load [wwi].[dimension_Supplier]')\n;\n\nCREATE TABLE [wwi].[dimension_TransactionType]\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [ext].[dimension_TransactionType]\nOPTION (LABEL = 'CTAS : Load [wwi].[dimension_TransactionType]')\n;\n\nCREATE TABLE [wwi].[fact_Movement]\nWITH\n(\n    DISTRIBUTION = HASH([Movement Key]),\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [ext].[fact_Movement]\nOPTION (LABEL = 'CTAS : Load [wwi].[fact_Movement]')\n;\n\nCREATE TABLE [wwi].[fact_Order]\nWITH\n(\n    DISTRIBUTION = HASH([Order Key]),\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [ext].[fact_Order]\nOPTION (LABEL = 'CTAS : Load [wwi].[fact_Order]')\n;\n\nCREATE TABLE [wwi].[fact_Purchase]\nWITH\n(\n    DISTRIBUTION = HASH([Purchase Key]),\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [ext].[fact_Purchase]\nOPTION (LABEL = 'CTAS : Load [wwi].[fact_Purchase]')\n;\n\nCREATE TABLE [wwi].[seed_Sale]\nWITH\n(\n    DISTRIBUTION = HASH([WWI Invoice ID]),\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [ext].[fact_Sale]\nOPTION (LABEL = 'CTAS : Load [wwi].[seed_Sale]')\n;\n\nCREATE TABLE [wwi].[fact_StockHolding]\nWITH\n(\n    DISTRIBUTION = HASH([Stock Holding Key]),\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [ext].[fact_StockHolding]\nOPTION (LABEL = 'CTAS : Load [wwi].[fact_StockHolding]')\n;\n\nCREATE TABLE [wwi].[fact_Transaction]\nWITH\n(\n    DISTRIBUTION = HASH([Transaction Key]),\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [ext].[fact_Transaction]\nOPTION (LABEL = 'CTAS : Load [wwi].[fact_Transaction]')\n;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "SampleDW",
+						"poolName": "SampleDW"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/World Wide data load monitor')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "SELECT\n    r.command,\n    s.request_id,\n    r.status,\n    count(distinct input_name) as nbr_files,\n    sum(s.bytes_processed)/1024/1024/1024 as gb_processed\nFROM\n    sys.dm_pdw_exec_requests r\n    INNER JOIN sys.dm_pdw_dms_external_work s\n    ON r.request_id = s.request_id\nWHERE\n    r.[label] = 'CTAS : Load [wwi].[dimension_City]' OR\n    r.[label] = 'CTAS : Load [wwi].[dimension_Customer]' OR\n    r.[label] = 'CTAS : Load [wwi].[dimension_Employee]' OR\n    r.[label] = 'CTAS : Load [wwi].[dimension_PaymentMethod]' OR\n    r.[label] = 'CTAS : Load [wwi].[dimension_StockItem]' OR\n    r.[label] = 'CTAS : Load [wwi].[dimension_Supplier]' OR\n    r.[label] = 'CTAS : Load [wwi].[dimension_TransactionType]' OR\n    r.[label] = 'CTAS : Load [wwi].[fact_Movement]' OR\n    r.[label] = 'CTAS : Load [wwi].[fact_Order]' OR\n    r.[label] = 'CTAS : Load [wwi].[fact_Purchase]' OR\n    r.[label] = 'CTAS : Load [wwi].[fact_StockHolding]' OR\n    r.[label] = 'CTAS : Load [wwi].[fact_Transaction]'\nGROUP BY\n    r.command,\n    s.request_id,\n    r.status\nORDER BY\n    nbr_files desc,\n    gb_processed desc;\n\nSELECT * FROM sys.dm_pdw_exec_requests;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "SampleDW",
+						"poolName": "SampleDW"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/World Wide Data Load part 2 generate the Date and Sales tables')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "/* **************************************************************************************\n* Setup loads world wide sample dataset\n* part 2: generate the Date and Sales tables\n* source: https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/load-data-wideworldimportersdw\n************************************************************************************** */\n\n\nCREATE TABLE [wwi].[dimension_Date]\n(\n    [Date] [datetime] NOT NULL,\n    [Day Number] [int] NOT NULL,\n    [Day] [nvarchar](10) NOT NULL,\n    [Month] [nvarchar](10) NOT NULL,\n    [Short Month] [nvarchar](3) NOT NULL,\n    [Calendar Month Number] [int] NOT NULL,\n    [Calendar Month Label] [nvarchar](20) NOT NULL,\n    [Calendar Year] [int] NOT NULL,\n    [Calendar Year Label] [nvarchar](10) NOT NULL,\n    [Fiscal Month Number] [int] NOT NULL,\n    [Fiscal Month Label] [nvarchar](20) NOT NULL,\n    [Fiscal Year] [int] NOT NULL,\n    [Fiscal Year Label] [nvarchar](10) NOT NULL,\n    [ISO Week Number] [int] NOT NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED INDEX ([Date])\n);\nCREATE TABLE [wwi].[fact_Sale]\n(\n    [Sale Key] [bigint] IDENTITY(1,1) NOT NULL,\n    [City Key] [int] NOT NULL,\n    [Customer Key] [int] NOT NULL,\n    [Bill To Customer Key] [int] NOT NULL,\n    [Stock Item Key] [int] NOT NULL,\n    [Invoice Date Key] [date] NOT NULL,\n    [Delivery Date Key] [date] NULL,\n    [Salesperson Key] [int] NOT NULL,\n    [WWI Invoice ID] [int] NOT NULL,\n    [Description] [nvarchar](100) NOT NULL,\n    [Package] [nvarchar](50) NOT NULL,\n    [Quantity] [int] NOT NULL,\n    [Unit Price] [decimal](18, 2) NOT NULL,\n    [Tax Rate] [decimal](18, 3) NOT NULL,\n    [Total Excluding Tax] [decimal](18, 2) NOT NULL,\n    [Tax Amount] [decimal](18, 2) NOT NULL,\n    [Profit] [decimal](18, 2) NOT NULL,\n    [Total Including Tax] [decimal](18, 2) NOT NULL,\n    [Total Dry Items] [int] NOT NULL,\n    [Total Chiller Items] [int] NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH\n(\n    DISTRIBUTION = HASH ( [WWI Invoice ID] ),\n    CLUSTERED COLUMNSTORE INDEX\n)\n;\n\n/*\nCreate [wwi].[InitialSalesDataPopulation] to increase the number of rows in [wwi].[seed_Sale] by a factor of eight.\n*/\n\nCREATE PROCEDURE [wwi].[InitialSalesDataPopulation] AS\nBEGIN\n    INSERT INTO [wwi].[seed_Sale] (\n        [Sale Key], [City Key], [Customer Key], [Bill To Customer Key], [Stock Item Key], [Invoice Date Key], [Delivery Date Key], [Salesperson Key], [WWI Invoice ID], [Description], [Package], [Quantity], [Unit Price], [Tax Rate], [Total Excluding Tax], [Tax Amount], [Profit], [Total Including Tax], [Total Dry Items], [Total Chiller Items], [Lineage Key]\n    )\n    SELECT\n        [Sale Key], [City Key], [Customer Key], [Bill To Customer Key], [Stock Item Key], [Invoice Date Key], [Delivery Date Key], [Salesperson Key], [WWI Invoice ID], [Description], [Package], [Quantity], [Unit Price], [Tax Rate], [Total Excluding Tax], [Tax Amount], [Profit], [Total Including Tax], [Total Dry Items], [Total Chiller Items], [Lineage Key]\n    FROM [wwi].[seed_Sale]\n\n    INSERT INTO [wwi].[seed_Sale] (\n        [Sale Key], [City Key], [Customer Key], [Bill To Customer Key], [Stock Item Key], [Invoice Date Key], [Delivery Date Key], [Salesperson Key], [WWI Invoice ID], [Description], [Package], [Quantity], [Unit Price], [Tax Rate], [Total Excluding Tax], [Tax Amount], [Profit], [Total Including Tax], [Total Dry Items], [Total Chiller Items], [Lineage Key]\n    )\n    SELECT\n        [Sale Key], [City Key], [Customer Key], [Bill To Customer Key], [Stock Item Key], [Invoice Date Key], [Delivery Date Key], [Salesperson Key], [WWI Invoice ID], [Description], [Package], [Quantity], [Unit Price], [Tax Rate], [Total Excluding Tax], [Tax Amount], [Profit], [Total Including Tax], [Total Dry Items], [Total Chiller Items], [Lineage Key]\n    FROM [wwi].[seed_Sale]\n\n    INSERT INTO [wwi].[seed_Sale] (\n        [Sale Key], [City Key], [Customer Key], [Bill To Customer Key], [Stock Item Key], [Invoice Date Key], [Delivery Date Key], [Salesperson Key], [WWI Invoice ID], [Description], [Package], [Quantity], [Unit Price], [Tax Rate], [Total Excluding Tax], [Tax Amount], [Profit], [Total Including Tax], [Total Dry Items], [Total Chiller Items], [Lineage Key]\n    )\n    SELECT\n        [Sale Key], [City Key], [Customer Key], [Bill To Customer Key], [Stock Item Key], [Invoice Date Key], [Delivery Date Key], [Salesperson Key], [WWI Invoice ID], [Description], [Package], [Quantity], [Unit Price], [Tax Rate], [Total Excluding Tax], [Tax Amount], [Profit], [Total Including Tax], [Total Dry Items], [Total Chiller Items], [Lineage Key]\n    FROM [wwi].[seed_Sale]\nEND\n;\n\n/*\nCreate this stored procedure that populates rows into wwi.dimension_Date\n*/\n\n\nCREATE PROCEDURE [wwi].[PopulateDateDimensionForYear] @Year [int] AS\nBEGIN\n    IF OBJECT_ID('tempdb..#month', 'U') IS NOT NULL\n        DROP TABLE #month\n    CREATE TABLE #month (\n        monthnum int,\n        numofdays int\n    )\n    WITH ( DISTRIBUTION = ROUND_ROBIN, heap )\n    INSERT INTO #month\n        SELECT 1, 31 UNION SELECT 2, CASE WHEN (@YEAR % 4 = 0 AND @YEAR % 100 <> 0) OR @YEAR % 400 = 0 THEN 29 ELSE 28 END UNION SELECT 3,31 UNION SELECT 4,30 UNION SELECT 5,31 UNION SELECT 6,30 UNION SELECT 7,31 UNION SELECT 8,31 UNION SELECT 9,30 UNION SELECT 10,31 UNION SELECT 11,30 UNION SELECT 12,31\n\n    IF OBJECT_ID('tempdb..#days', 'U') IS NOT NULL\n        DROP TABLE #days\n    CREATE TABLE #days (days int)\n    WITH (DISTRIBUTION = ROUND_ROBIN, HEAP)\n\n    INSERT INTO #days\n        SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 UNION SELECT 12 UNION SELECT 13 UNION SELECT 14 UNION SELECT 15 UNION SELECT 16 UNION SELECT 17 UNION SELECT 18 UNION SELECT 19 UNION SELECT 20    UNION SELECT 21 UNION SELECT 22 UNION SELECT 23 UNION SELECT 24 UNION SELECT 25 UNION SELECT 26 UNION SELECT 27 UNION SELECT 28 UNION SELECT 29 UNION SELECT 30 UNION SELECT 31\n\n    INSERT [wwi].[dimension_Date] (\n        [Date], [Day Number], [Day], [Month], [Short Month], [Calendar Month Number], [Calendar Month Label], [Calendar Year], [Calendar Year Label], [Fiscal Month Number], [Fiscal Month Label], [Fiscal Year], [Fiscal Year Label], [ISO Week Number]\n    )\n    SELECT\n        CAST(CAST(monthnum AS VARCHAR(2)) + '/' + CAST([days] AS VARCHAR(3)) + '/' + CAST(@year AS CHAR(4)) AS DATE) AS [Date]\n        ,DAY(CAST(CAST(monthnum AS VARCHAR(2)) + '/' + CAST([days] AS VARCHAR(3)) + '/' + CAST(@year AS CHAR(4)) AS DATE)) AS [Day Number]\n        ,CAST(DATENAME(day, CAST(CAST(monthnum AS VARCHAR(2)) + '/' + CAST([days] AS VARCHAR(3)) + '/' + CAST(@year AS CHAR(4)) AS DATE)) AS NVARCHAR(10)) AS [Day]\n        ,CAST(DATENAME(month, CAST(CAST(monthnum AS VARCHAR(2)) + '/' + CAST([days] AS VARCHAR(3)) + '/' + CAST(@year as char(4)) AS DATE)) AS nvarchar(10)) AS [Month]\n        ,CAST(SUBSTRING(DATENAME(month, CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)), 1, 3) AS nvarchar(3)) AS [Short Month]\n        ,MONTH(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) AS [Calendar Month Number]\n        ,CAST(N'CY' + CAST(YEAR(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) AS nvarchar(4)) + N'-' + SUBSTRING(DATENAME(month, CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)), 1, 3) AS nvarchar(10)) AS [Calendar Month Label]\n        ,YEAR(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) AS [Calendar Year]\n        ,CAST(N'CY' + CAST(YEAR(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) AS nvarchar(4)) AS nvarchar(10)) AS [Calendar Year Label]\n        ,CASE WHEN MONTH(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) IN (11, 12)\n        THEN MONTH(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) - 10\n        ELSE MONTH(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) + 2 END AS [Fiscal Month Number]\n        ,CAST(N'FY' + CAST(CASE WHEN MONTH(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) IN (11, 12)\n        THEN YEAR(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) + 1\n        ELSE YEAR(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) END AS nvarchar(4)) + N'-' + SUBSTRING(DATENAME(month, CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)), 1, 3) AS nvarchar(20)) AS [Fiscal Month Label]\n        ,CASE WHEN MONTH(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) IN (11, 12)\n        THEN YEAR(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) + 1\n        ELSE YEAR(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) END AS [Fiscal Year]\n        ,CAST(N'FY' + CAST(CASE WHEN MONTH(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) IN (11, 12)\n        THEN YEAR(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) + 1\n        ELSE YEAR(CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE))END AS nvarchar(4)) AS nvarchar(10)) AS [Fiscal Year Label]\n        , DATEPART(ISO_WEEK, CAST(CAST(monthnum as varchar(2)) + '/' + CAST([days] as varchar(3)) + '/' + CAST(@year as char(4)) AS DATE)) AS [ISO Week Number]\nFROM #month m\n    CROSS JOIN #days d\nWHERE d.days <= m.numofdays\n\nDROP table #month;\nDROP table #days;\nEND;\n\n\n\n/*\nCreate this procedure that populates the wwi.dimension_Date and wwi.fact_Sale tables. It calls [wwi].[PopulateDateDimensionForYear] to populate wwi.dimension_Date.\n*/\n\nCREATE PROCEDURE [wwi].[Configuration_PopulateLargeSaleTable] @EstimatedRowsPerDay [bigint],@Year [int] AS\nBEGIN\n    SET NOCOUNT ON;\n    SET XACT_ABORT ON;\n\n    EXEC [wwi].[PopulateDateDimensionForYear] @Year;\n\n    DECLARE @OrderCounter bigint = 0;\n    DECLARE @NumberOfSalesPerDay bigint = @EstimatedRowsPerDay;\n    DECLARE @DateCounter date;\n    DECLARE @StartingSaleKey bigint;\n    DECLARE @MaximumSaleKey bigint = (SELECT MAX([Sale Key]) FROM wwi.seed_Sale);\n    DECLARE @MaxDate date;\n    SET @MaxDate = (SELECT MAX([Invoice Date Key]) FROM wwi.fact_Sale)\n    IF ( @MaxDate < CAST(@YEAR AS CHAR(4)) + '1231') AND (@MaxDate > CAST(@YEAR AS CHAR(4)) + '0101')\n        SET @DateCounter = @MaxDate\n    ELSE\n        SET @DateCounter= CAST(@Year as char(4)) + '0101';\n\n    PRINT 'Targeting ' + CAST(@NumberOfSalesPerDay AS varchar(20)) + ' sales per day.';\n\n    DECLARE @OutputCounter varchar(20);\n    DECLARE @variance DECIMAL(18,10);\n    DECLARE @VariantNumberOfSalesPerDay BIGINT;\n\n    WHILE @DateCounter < CAST(@YEAR AS CHAR(4)) + '1231'\n    BEGIN\n        SET @OutputCounter = CONVERT(varchar(20), @DateCounter, 112);\n        RAISERROR(@OutputCounter, 0, 1);\n        SET @variance = (SELECT RAND() * 10)*.01 + .95\n        SET @VariantNumberOfSalesPerDay = FLOOR(@NumberOfSalesPerDay * @variance)\n\n        SET @StartingSaleKey = @MaximumSaleKey - @VariantNumberOfSalesPerDay - FLOOR(RAND() * 20000);\n        SET @OrderCounter = 0;\n\n        INSERT [wwi].[fact_Sale] (\n            [City Key], [Customer Key], [Bill To Customer Key], [Stock Item Key], [Invoice Date Key], [Delivery Date Key], [Salesperson Key], [WWI Invoice ID], [Description], Package, Quantity, [Unit Price], [Tax Rate], [Total Excluding Tax], [Tax Amount], Profit, [Total Including Tax], [Total Dry Items], [Total Chiller Items], [Lineage Key]\n        )\n        SELECT TOP(@VariantNumberOfSalesPerDay)\n            [City Key], [Customer Key], [Bill To Customer Key], [Stock Item Key], @DateCounter, DATEADD(day, 1, @DateCounter), [Salesperson Key], [WWI Invoice ID], [Description], Package, Quantity, [Unit Price], [Tax Rate], [Total Excluding Tax], [Tax Amount], Profit, [Total Including Tax], [Total Dry Items], [Total Chiller Items], [Lineage Key]\n        FROM [wwi].[seed_Sale]\n        WHERE\n             --[Sale Key] > @StartingSaleKey and /* IDENTITY DOES NOT WORK THE SAME IN SQLDW AND CAN'T USE THIS METHOD FOR VARIANT */\n            [Invoice Date Key] >=cast(@YEAR AS CHAR(4)) + '-01-01'\n        ORDER BY [Sale Key];\n\n        SET @DateCounter = DATEADD(day, 1, @DateCounter);\n    END;\n\nEND;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "SampleDW",
+						"poolName": "SampleDW"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/World Wide Data Load part 3 stored procs')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "/* **************************************************************************************\n* Setup loads world wide sample dataset\n* part 3: stored procs\n* source: https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/load-data-wideworldimportersdw\n************************************************************************************** */\nEXEC [wwi].[InitialSalesDataPopulation]\n;\nselect count(*) from wwi.seed_sale\n;\n\nEXEC [wwi].[Configuration_PopulateLargeSaleTable] 100000, 2000  -- TOO SMALL Memory cant run\n;\nSELECT MAX([Invoice Date Key]) FROM wwi.fact_Sale; \n\nEXEC sp_spaceused N'wwi.fact_Sale';\n\n\nSELECT TOP 1 * FROM [wwi].[dimension_City];\nSELECT TOP 1 * FROM [wwi].[dimension_Customer];\nSELECT TOP 1 * FROM [wwi].[dimension_Date];\nSELECT TOP 1 * FROM [wwi].[dimension_Employee];\nSELECT TOP 1 * FROM [wwi].[dimension_PaymentMethod];\nSELECT TOP 1 * FROM [wwi].[dimension_StockItem];\nSELECT TOP 1 * FROM [wwi].[dimension_Supplier];\nSELECT TOP 1 * FROM [wwi].[dimension_TransactionType];\n\n\n\n/*\nstored proc to refresh query stats\n*/\n\nCREATE PROCEDURE    [dbo].[prc_sqldw_create_stats]\n(   @create_type    tinyint -- 1 default 2 Fullscan 3 Sample\n,   @sample_pct     tinyint\n)\nAS\n\nIF @create_type IS NULL\nBEGIN\n    SET @create_type = 1;\nEND;\n\nIF @create_type NOT IN (1,2,3)\nBEGIN\n    THROW 151000,'Invalid value for @stats_type parameter. Valid range 1 (default), 2 (fullscan) or 3 (sample).',1;\nEND;\n\nIF @sample_pct IS NULL\nBEGIN;\n    SET @sample_pct = 20;\nEND;\n\nIF OBJECT_ID('tempdb..#stats_ddl') IS NOT NULL\nBEGIN;\n    DROP TABLE #stats_ddl;\nEND;\n\nCREATE TABLE #stats_ddl\nWITH    (   DISTRIBUTION    = HASH([seq_nmbr])\n        ,   LOCATION        = USER_DB\n        )\nAS\nWITH T\nAS\n(\nSELECT      t.[name]                        AS [table_name]\n,           s.[name]                        AS [table_schema_name]\n,           c.[name]                        AS [column_name]\n,           c.[column_id]                   AS [column_id]\n,           t.[object_id]                   AS [object_id]\n,           ROW_NUMBER()\n            OVER(ORDER BY (SELECT NULL))    AS [seq_nmbr]\nFROM        sys.[tables] t\nJOIN        sys.[schemas] s         ON  t.[schema_id]       = s.[schema_id]\nJOIN        sys.[columns] c         ON  t.[object_id]       = c.[object_id]\nLEFT JOIN   sys.[stats_columns] l   ON  l.[object_id]       = c.[object_id]\n                                    AND l.[column_id]       = c.[column_id]\n                                    AND l.[stats_column_id] = 1\nLEFT JOIN    sys.[external_tables] e    ON    e.[object_id]        = t.[object_id]\nWHERE       l.[object_id] IS NULL\nAND            e.[object_id] IS NULL -- not an external table\n)\nSELECT  [table_schema_name]\n,       [table_name]\n,       [column_name]\n,       [column_id]\n,       [object_id]\n,       [seq_nmbr]\n,       CASE @create_type\n        WHEN 1\n        THEN    CAST('CREATE STATISTICS '+QUOTENAME('stat_'+table_schema_name+ '_' + table_name + '_'+column_name)+' ON '+QUOTENAME(table_schema_name)+'.'+QUOTENAME(table_name)+'('+QUOTENAME(column_name)+')' AS VARCHAR(8000))\n        WHEN 2\n        THEN    CAST('CREATE STATISTICS '+QUOTENAME('stat_'+table_schema_name+ '_' + table_name + '_'+column_name)+' ON '+QUOTENAME(table_schema_name)+'.'+QUOTENAME(table_name)+'('+QUOTENAME(column_name)+') WITH FULLSCAN' AS VARCHAR(8000))\n        WHEN 3\n        THEN    CAST('CREATE STATISTICS '+QUOTENAME('stat_'+table_schema_name+ '_' + table_name + '_'+column_name)+' ON '+QUOTENAME(table_schema_name)+'.'+QUOTENAME(table_name)+'('+QUOTENAME(column_name)+') WITH SAMPLE '+CONVERT(varchar(4),@sample_pct)+' PERCENT' AS VARCHAR(8000))\n        END AS create_stat_ddl\nFROM T\n;\n\nDECLARE @i INT              = 1\n,       @t INT              = (SELECT COUNT(*) FROM #stats_ddl)\n,       @s NVARCHAR(4000)   = N''\n;\n\nWHILE @i <= @t\nBEGIN\n    SET @s=(SELECT create_stat_ddl FROM #stats_ddl WHERE seq_nmbr = @i);\n    PRINT @s\n    EXEC sp_executesql @s\n    SET @i+=1;\nEND\n\nDROP TABLE #stats_ddl;\n\n\n\nEXEC [dbo].[prc_sqldw_create_stats] 1, NULL;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "SampleDW",
+						"poolName": "SampleDW"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/World Wide Data distribution')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "DBCC PDW_SHOWSPACEUSED('wwi.fact_order');\n\ncreate schema wwi_perf;\nCREATE VIEW [wwi_perf].[vTableSizes]\nAS\nWITH base\nAS\n(\nSELECT\n    GETDATE()                                                              AS  [execution_time]\n    , DB_NAME()                                                            AS  [database_name]\n    , s.name                                                               AS  [schema_name]\n    , t.name                                                               AS  [table_name]\n    , QUOTENAME(s.name)+'.'+QUOTENAME(t.name)                              AS  [two_part_name]\n    , nt.[name]                                                            AS  [node_table_name]\n    , ROW_NUMBER() OVER(PARTITION BY nt.[name] ORDER BY (SELECT NULL))     AS  [node_table_name_seq]\n    , tp.[distribution_policy_desc]                                        AS  [distribution_policy_name]\n    , c.[name]                                                             AS  [distribution_column]\n    , nt.[distribution_id]                                                 AS  [distribution_id]\n    , i.[type]                                                             AS  [index_type]\n    , i.[type_desc]                                                        AS  [index_type_desc]\n    , nt.[pdw_node_id]                                                     AS  [pdw_node_id]\n    , pn.[type]                                                            AS  [pdw_node_type]\n    , pn.[name]                                                            AS  [pdw_node_name]\n    , di.name                                                              AS  [dist_name]\n    , di.position                                                          AS  [dist_position]\n    , nps.[partition_number]                                               AS  [partition_nmbr]\n    , nps.[reserved_page_count]                                            AS  [reserved_space_page_count]\n    , nps.[reserved_page_count] - nps.[used_page_count]                    AS  [unused_space_page_count]\n    , nps.[in_row_data_page_count]\n        + nps.[row_overflow_used_page_count]\n        + nps.[lob_used_page_count]                                        AS  [data_space_page_count]\n    , nps.[reserved_page_count]\n    - (nps.[reserved_page_count] - nps.[used_page_count])\n    - ([in_row_data_page_count]\n            + [row_overflow_used_page_count]+[lob_used_page_count])        AS  [index_space_page_count]\n    , nps.[row_count]                                                      AS  [row_count]\nFROM\n    sys.schemas s\nINNER JOIN sys.tables t\n    ON s.[schema_id] = t.[schema_id]\nINNER JOIN sys.indexes i\n    ON  t.[object_id] = i.[object_id]\n    AND i.[index_id] <= 1\nINNER JOIN sys.pdw_table_distribution_properties tp\n    ON t.[object_id] = tp.[object_id]\nINNER JOIN sys.pdw_table_mappings tm\n    ON t.[object_id] = tm.[object_id]\nINNER JOIN sys.pdw_nodes_tables nt\n    ON tm.[physical_name] = nt.[name]\nINNER JOIN sys.dm_pdw_nodes pn\n    ON  nt.[pdw_node_id] = pn.[pdw_node_id]\nINNER JOIN sys.pdw_distributions di\n    ON  nt.[distribution_id] = di.[distribution_id]\nINNER JOIN sys.dm_pdw_nodes_db_partition_stats nps\n    ON nt.[object_id] = nps.[object_id]\n    AND nt.[pdw_node_id] = nps.[pdw_node_id]\n    AND nt.[distribution_id] = nps.[distribution_id]\nLEFT OUTER JOIN (select * from sys.pdw_column_distribution_properties where distribution_ordinal = 1) cdp\n    ON t.[object_id] = cdp.[object_id]\nLEFT OUTER JOIN sys.columns c\n    ON cdp.[object_id] = c.[object_id]\n    AND cdp.[column_id] = c.[column_id]\nWHERE pn.[type] = 'COMPUTE'\n)\n, size\nAS\n(\nSELECT\n[execution_time]\n,  [database_name]\n,  [schema_name]\n,  [table_name]\n,  [two_part_name]\n,  [node_table_name]\n,  [node_table_name_seq]\n,  [distribution_policy_name]\n,  [distribution_column]\n,  [distribution_id]\n,  [index_type]\n,  [index_type_desc]\n,  [pdw_node_id]\n,  [pdw_node_type]\n,  [pdw_node_name]\n,  [dist_name]\n,  [dist_position]\n,  [partition_nmbr]\n,  [reserved_space_page_count]\n,  [unused_space_page_count]\n,  [data_space_page_count]\n,  [index_space_page_count]\n,  [row_count]\n,  ([reserved_space_page_count] * 8.0)                                 AS [reserved_space_KB]\n,  ([reserved_space_page_count] * 8.0)/1000                            AS [reserved_space_MB]\n,  ([reserved_space_page_count] * 8.0)/1000000                         AS [reserved_space_GB]\n,  ([reserved_space_page_count] * 8.0)/1000000000                      AS [reserved_space_TB]\n,  ([unused_space_page_count]   * 8.0)                                 AS [unused_space_KB]\n,  ([unused_space_page_count]   * 8.0)/1000                            AS [unused_space_MB]\n,  ([unused_space_page_count]   * 8.0)/1000000                         AS [unused_space_GB]\n,  ([unused_space_page_count]   * 8.0)/1000000000                      AS [unused_space_TB]\n,  ([data_space_page_count]     * 8.0)                                 AS [data_space_KB]\n,  ([data_space_page_count]     * 8.0)/1000                            AS [data_space_MB]\n,  ([data_space_page_count]     * 8.0)/1000000                         AS [data_space_GB]\n,  ([data_space_page_count]     * 8.0)/1000000000                      AS [data_space_TB]\n,  ([index_space_page_count]  * 8.0)                                   AS [index_space_KB]\n,  ([index_space_page_count]  * 8.0)/1000                              AS [index_space_MB]\n,  ([index_space_page_count]  * 8.0)/1000000                           AS [index_space_GB]\n,  ([index_space_page_count]  * 8.0)/1000000000                        AS [index_space_TB]\nFROM base\n)\nSELECT *\nFROM size\n;\n\n\n/* \nreview table distributions\n*/\n\nSELECT\n    database_name\n,    schema_name\n,    table_name\n,    distribution_policy_name\n,      distribution_column\n,    index_type_desc\n,    COUNT(distinct partition_nmbr) as nbr_partitions\n,    SUM(row_count)                 as table_row_count\n,    SUM(reserved_space_GB)         as table_reserved_space_GB\n,    SUM(data_space_GB)             as table_data_space_GB\n,    SUM(index_space_GB)            as table_index_space_GB\n,    SUM(unused_space_GB)           as table_unused_space_GB\nFROM\n    [wwi_perf].[vTableSizes]\nWHERE\n    schema_name = 'wwi'\nGROUP BY\n    database_name\n,    schema_name\n,    table_name\n,    distribution_policy_name\n,      distribution_column\n,    index_type_desc\nORDER BY\n    table_reserved_space_GB desc\n\n;\n\n\n\n\n\n\ncreate view [wwi_perf].[vColumnStoreRowGroupStats]\nas\nwith cte\nas\n(\nselect   tb.[name]                    AS [logical_table_name]\n,        rg.[row_group_id]            AS [row_group_id]\n,        rg.[state]                   AS [state]\n,        rg.[state_desc]              AS [state_desc]\n,        rg.[total_rows]              AS [total_rows]\n,        rg.[trim_reason_desc]        AS trim_reason_desc\n,        mp.[physical_name]           AS physical_name\nFROM    sys.[schemas] sm\nJOIN    sys.[tables] tb               ON  sm.[schema_id]          = tb.[schema_id]\nJOIN    sys.[pdw_table_mappings] mp   ON  tb.[object_id]          = mp.[object_id]\nJOIN    sys.[pdw_nodes_tables] nt     ON  nt.[name]               = mp.[physical_name]\nJOIN    sys.[dm_pdw_nodes_db_column_store_row_group_physical_stats] rg      ON  rg.[object_id]     = nt.[object_id]\n                                                                            AND rg.[pdw_node_id]   = nt.[pdw_node_id]\n                                        AND rg.[distribution_id]    = nt.[distribution_id]\n)\nselect *\nfrom cte;\n\n\n\nSELECT\n    *\nFROM\n    [wwi_perf].[vColumnStoreRowGroupStats]\nWHERE\n    Logical_Table_Name = 'seed_Sale'\n    ;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "SampleDW",
+						"poolName": "SampleDW"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		}
+	]
+}
